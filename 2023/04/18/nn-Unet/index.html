@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>神经网络之Unet | 我的技术测试</title><meta name="author" content="Patrick"><meta name="copyright" content="Patrick"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="super—slomo图像插值算法中间使用了两个Unet网络，这里对Unet进行介绍。输入: 1*572*572输出: 2*388*388（1）UNet采用全卷积神经网络。（2）左边网络为特征提取网络：使用conv和pooling（3）右边网络为特征融合网络：使用上采样产生的特征图与左侧特征图进行concatenate操作。（pooling层会丢失图像信息和降低图像分辨率且是永久性的，对于图像分割">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络之Unet">
+<meta property="og:url" content="http://callmelp.online/2023/04/18/nn-Unet/index.html">
+<meta property="og:site_name" content="我的技术测试">
+<meta property="og:description" content="super—slomo图像插值算法中间使用了两个Unet网络，这里对Unet进行介绍。输入: 1*572*572输出: 2*388*388（1）UNet采用全卷积神经网络。（2）左边网络为特征提取网络：使用conv和pooling（3）右边网络为特征融合网络：使用上采样产生的特征图与左侧特征图进行concatenate操作。（pooling层会丢失图像信息和降低图像分辨率且是永久性的，对于图像分割">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://callmelp.online/img/default_cover.jpg">
+<meta property="article:published_time" content="2023-04-18T02:50:56.000Z">
+<meta property="article:modified_time" content="2023-04-18T02:54:13.277Z">
+<meta property="article:author" content="Patrick">
+<meta property="article:tag" content="Log">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://callmelp.online/img/default_cover.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://callmelp.online/2023/04/18/nn-Unet/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?abd60509cbed3d7c6baef1cba2320d84";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/js/search/local-search.js","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '神经网络之Unet',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2023-04-18 10:54:13'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/video.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/me.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/default_cover.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">我的技术测试</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">神经网络之Unet</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-18T02:50:56.000Z" title="发表于 2023-04-18 10:50:56">2023-04-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-18T02:54:13.277Z" title="更新于 2023-04-18 10:54:13">2023-04-18</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="神经网络之Unet"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>super—slomo图像插值算法中间使用了两个Unet网络，这里对Unet进行介绍。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230411154443.png" alt="20230411154443"><br>输入: 1*572*572<br>输出: 2*388*388<br>（1）UNet采用全卷积神经网络。<br>（2）左边网络为特征提取网络：使用conv和pooling<br>（3）右边网络为特征融合网络：使用上采样产生的特征图与左侧特征图进行concatenate操作。（pooling层会丢失图像信息和降低图像分辨率且是永久性的，对于图像分割任务有一些影响，对图像分类任务的影响不大，为什么要做上采样呢？上采样可以让包含高级抽象特征低分辨率图片在保留高级抽象特征的同时变为高分辨率，然后再与左边低级表层特征高分辨率图片进行concatenate操作）<br>（4）最后再经过两次卷积操作，生成特征图，再用两个卷积核大小为1*1的卷积做分类得到最后的两张heatmap，例如第一张表示第一类的得分，第二张表示第二类的得分heatmap，然后作为softmax函数的输入，算出概率比较大的softmax，然后再进行loss，反向传播计算。     </p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">这是根据UNet模型搭建出的一个基本网络结构</span></span><br><span class="line"><span class="string">输入和输出大小是一样的，可以根据需求进行修改</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基本卷积块</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Conv</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, C_in, C_out</span>):</span><br><span class="line">        <span class="built_in">super</span>(Conv, self).__init__()</span><br><span class="line">        self.layer = nn.Sequential(</span><br><span class="line"></span><br><span class="line">            nn.Conv2d(C_in, C_out, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),</span><br><span class="line">            nn.BatchNorm2d(C_out),</span><br><span class="line">            <span class="comment"># 防止过拟合</span></span><br><span class="line">            nn.Dropout(<span class="number">0.3</span>),</span><br><span class="line">            nn.LeakyReLU(),</span><br><span class="line"></span><br><span class="line">            nn.Conv2d(C_out, C_out, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>),</span><br><span class="line">            nn.BatchNorm2d(C_out),</span><br><span class="line">            <span class="comment"># 防止过拟合</span></span><br><span class="line">            nn.Dropout(<span class="number">0.4</span>),</span><br><span class="line">            nn.LeakyReLU(),</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="keyword">return</span> self.layer(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下采样模块 max pool层</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DownSampling</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, C</span>):</span><br><span class="line">        <span class="built_in">super</span>(DownSampling, self).__init__()</span><br><span class="line">        self.Down = nn.Sequential(</span><br><span class="line">            <span class="comment"># 使用卷积进行2倍的下采样，通道数不变</span></span><br><span class="line">            nn.Conv2d(C, C, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>),</span><br><span class="line">            nn.LeakyReLU()</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="keyword">return</span> self.Down(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 上采样模块 up-conv层</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UpSampling</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, C</span>):</span><br><span class="line">        <span class="built_in">super</span>(UpSampling, self).__init__()</span><br><span class="line">        <span class="comment"># 特征图大小扩大2倍，通道数减半</span></span><br><span class="line">        self.Up = nn.Conv2d(C, C // <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, r</span>):</span><br><span class="line">        <span class="comment"># 使用邻近插值进行下采样</span></span><br><span class="line">        up = F.interpolate(x, scale_factor=<span class="number">2</span>, mode=<span class="string">&quot;nearest&quot;</span>)</span><br><span class="line">        x = self.Up(up)</span><br><span class="line">        <span class="comment"># 拼接，当前上采样的，和之前下采样过程中的</span></span><br><span class="line">        <span class="keyword">return</span> torch.cat((x, r), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 主干网络</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UNet</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(UNet, self).__init__()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4次下采样</span></span><br><span class="line">        self.C1 = Conv(<span class="number">3</span>, <span class="number">64</span>)</span><br><span class="line">        self.D1 = DownSampling(<span class="number">64</span>)</span><br><span class="line">        self.C2 = Conv(<span class="number">64</span>, <span class="number">128</span>)</span><br><span class="line">        self.D2 = DownSampling(<span class="number">128</span>)</span><br><span class="line">        self.C3 = Conv(<span class="number">128</span>, <span class="number">256</span>)</span><br><span class="line">        self.D3 = DownSampling(<span class="number">256</span>)</span><br><span class="line">        self.C4 = Conv(<span class="number">256</span>, <span class="number">512</span>)</span><br><span class="line">        self.D4 = DownSampling(<span class="number">512</span>)</span><br><span class="line">        self.C5 = Conv(<span class="number">512</span>, <span class="number">1024</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4次上采样</span></span><br><span class="line">        self.U1 = UpSampling(<span class="number">1024</span>)</span><br><span class="line">        self.C6 = Conv(<span class="number">1024</span>, <span class="number">512</span>)</span><br><span class="line">        self.U2 = UpSampling(<span class="number">512</span>)</span><br><span class="line">        self.C7 = Conv(<span class="number">512</span>, <span class="number">256</span>)</span><br><span class="line">        self.U3 = UpSampling(<span class="number">256</span>)</span><br><span class="line">        self.C8 = Conv(<span class="number">256</span>, <span class="number">128</span>)</span><br><span class="line">        self.U4 = UpSampling(<span class="number">128</span>)</span><br><span class="line">        self.C9 = Conv(<span class="number">128</span>, <span class="number">64</span>)</span><br><span class="line"></span><br><span class="line">        self.Th = torch.nn.Sigmoid()</span><br><span class="line">        self.pred = torch.nn.Conv2d(<span class="number">64</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># 下采样部分</span></span><br><span class="line">        R1 = self.C1(x)</span><br><span class="line">        R2 = self.C2(self.D1(R1))</span><br><span class="line">        R3 = self.C3(self.D2(R2))</span><br><span class="line">        R4 = self.C4(self.D3(R3))</span><br><span class="line">        Y1 = self.C5(self.D4(R4))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 上采样部分</span></span><br><span class="line">        <span class="comment"># 上采样的时候需要拼接起来</span></span><br><span class="line">        O1 = self.C6(self.U1(Y1, R4))</span><br><span class="line">        O2 = self.C7(self.U2(O1, R3))</span><br><span class="line">        O3 = self.C8(self.U3(O2, R2))</span><br><span class="line">        O4 = self.C9(self.U4(O3, R1))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 输出预测，这里大小跟输入是一致的</span></span><br><span class="line">        <span class="comment"># 可以把下采样时的中间抠出来再进行拼接，这样修改后输出就会更小</span></span><br><span class="line">        <span class="keyword">return</span> self.Th(self.pred(O4))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    a = torch.randn(<span class="number">2</span>, <span class="number">3</span>, <span class="number">256</span>, <span class="number">256</span>)</span><br><span class="line">    net = UNet()</span><br><span class="line">    <span class="built_in">print</span>(net(a).shape)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://callmelp.online">Patrick</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://callmelp.online/2023/04/18/nn-Unet/">http://callmelp.online/2023/04/18/nn-Unet/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://callmelp.online" target="_blank">我的技术测试</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Log/">Log</a></div><div class="post_share"><div class="social-share" data-image="/img/default_cover.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/04/18/VFI-DVF/"><img class="prev-cover" src="/img/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">视频插帧之DVF</div></div></a></div><div class="next-post pull-right"><a href="/2023/04/04/image-eva/"><img class="next-cover" src="/img/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">图像评价常用指标</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/10/27/cuda9-1-pytorch/" title="win10 cuda9.1安装pytorch"><img class="cover" src="https://image.baidu.com/search/detail?ct=503316480&z=undefined&tn=baiduimagedetail&ipn=d&word=pytorch&step_word=&ie=utf-8&in=&cl=2&lm=-1&st=undefined&hd=undefined&latest=undefined&copyright=undefined&cs=699234529,3390476958&os=3500099683,3546995953&simid=699234529,3390476958&pn=1&rn=1&di=7146857200093233153&ln=1702&fr=&fmq=1666943867246_R&fm=&ic=undefined&s=undefined&se=&sme=&tab=0&width=undefined&height=undefined&face=undefined&is=0,0&istype=0&ist=&jit=&bdtype=0&spn=0&pi=0&gsm=1e0000000000001e&objurl=https%3A%2F%2Fgimg2.baidu.com%2Fimage_search%2Fsrc%3Dhttp%253A%252F%252Fpic3.zhimg.com%252Fv2-be041fbfd476995c0127a2d7c13d681a_400x224.jpg%26refer%3Dhttp%253A%252F%252Fpic3.zhimg.com%26app%3D2002%26size%3Df9999%2C10000%26q%3Da80%26n%3D0%26g%3D0n%26fmt%3Dauto%3Fsec%3D1669535866%26t%3D1a26759eebe43efac3bc4223e785b5a3&rpstart=0&rpnum=0&adpicid=0&nojc=undefined&dyTabStr=MCwzLDIsMSw2LDQsNSw3LDgsOQ%3D%3D" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-10-27</div><div class="title">win10 cuda9.1安装pytorch</div></div></a></div><div><a href="/2023/04/18/VFI-DVF-vocelAndInsert/" title="VFI_DVF_vocelAndInsert"><img class="cover" src="/img/default_cover.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-18</div><div class="title">VFI_DVF_vocelAndInsert</div></div></a></div><div><a href="/2023/04/18/VFI-RIFE/" title="视频插帧之RIFE"><img class="cover" src="/img/default_cover.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-18</div><div class="title">视频插帧之RIFE</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/me.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Patrick</div><div class="author-info__description">自称全栈工程师</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/callmeLP"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/callmeLP" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:343786790@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://www.zhihu.com/people/serenade-96-19" target="_blank" title="zhihu"><i class="fab fa-zhihu"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.</span> <span class="toc-text">代码</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-DVF-vocelAndInsert/" title="VFI_DVF_vocelAndInsert"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="VFI_DVF_vocelAndInsert"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-DVF-vocelAndInsert/" title="VFI_DVF_vocelAndInsert">VFI_DVF_vocelAndInsert</a><time datetime="2023-04-18T02:59:33.000Z" title="发表于 2023-04-18 10:59:33">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-foreward-backward-warping/" title="视频插帧之前后向变形"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之前后向变形"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-foreward-backward-warping/" title="视频插帧之前后向变形">视频插帧之前后向变形</a><time datetime="2023-04-18T02:57:44.000Z" title="发表于 2023-04-18 10:57:44">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-optical-flow/" title="视频插帧之光流"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之光流"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-optical-flow/" title="视频插帧之光流">视频插帧之光流</a><time datetime="2023-04-18T02:56:00.000Z" title="发表于 2023-04-18 10:56:00">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-RIFE/" title="视频插帧之RIFE"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之RIFE"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-RIFE/" title="视频插帧之RIFE">视频插帧之RIFE</a><time datetime="2023-04-18T02:54:40.000Z" title="发表于 2023-04-18 10:54:40">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-DVF/" title="视频插帧之DVF"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之DVF"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-DVF/" title="视频插帧之DVF">视频插帧之DVF</a><time datetime="2023-04-18T02:53:02.000Z" title="发表于 2023-04-18 10:53:02">2023-04-18</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Patrick</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="framework-info"><img src="https://static.dy208.cn/o_1dfilp8ruo521thr1hvf18ji17soa.png"/><span> </span><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/">黔ICP备2022002429号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container').forEach(node => {
+            if (node.hasAttribute('display')) {
+              btf.wrap(node, 'div', { class: 'mathjax-overflow' })
+            } else {
+              btf.wrap(node, 'span', { class: 'mathjax-overflow' })
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'oYv71MVDp4E6q2tg0PEzNyns-gzGzoHsz',
+      appKey: 'ljivoAUqxqrxlExQo7yIrgcg',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, "https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start -->
+  <script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/hexo-github-calendar@1.16/hexo_githubcalendar.js"></script>
+  <script data-pjax>
+        function GithubCalendarConfig(){
+            var git_githubapiurl ="https://python-github-calendar-api.vercel.app/api?callmeLP";
+            var git_color =['#ebedf0', '#fdcdec', '#fc9bd9', '#fa6ac5', '#f838b2', '#f5089f', '#c4067e', '#92055e', '#540336', '#48022f', '#30021f'];
+            var git_user ="callmeLP";
+            var parent_div_git = document.getElementById('recent-posts');
+            var git_div_html = '<div class="recent-post-item" style="width:100%;height:auto;padding:10px;"><div id="github_loading" style="width:10%;height:100%;margin:0 auto;display: block"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 50 50" style="enable-background:new 0 0 50 50" xml:space="preserve"><path fill="#d0d0d0" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z" transform="rotate(275.098 25 25)"><animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"></animateTransform></path></svg></div><div id="github_container"></div></div>';
+            if(parent_div_git && location.pathname =='/'){
+                console.log('已挂载github calendar')
+                // parent_div_git.innerHTML=git_div_html+parent_div_git.innerHTML // 无报错，但不影响使用(支持pjax跳转)
+                parent_div_git.insertAdjacentHTML("afterbegin",git_div_html) // 有报错，但不影响使用(支持pjax跳转)
+            };
+            GithubCalendar(git_githubapiurl,git_color,git_user)
+        }
+        if(document.getElementById('recent-posts')){
+            GithubCalendarConfig()
+        }
+    </script>
+    <style>#github_container{min-height:280px}@media screen and (max-width:650px) {#github_container{background-image:;min-height:0px}}</style>
+    <style>undefined</style><!-- hexo injector body_end end --></body></html>
