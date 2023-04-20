@@ -1,0 +1,334 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>知识蒸馏简介 | 我的技术测试</title><meta name="author" content="Patrick"><meta name="copyright" content="Patrick"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍在化学中，蒸馏是一种有效的分离不同沸点组分的方法，大致步骤是先升温使低沸点的组分汽化，然后降温冷凝，达到分离出目标物质的目的。化学蒸馏条件:（1）蒸馏的液体是混合物;（2）各组分沸点不同。 一般地，大模型往往是单个复杂网络或者是若干网络的集合，拥有良好的性能和泛化能力，而小模型因为网络规模较小，表达能力有限。因此，可以利用大模型学习到的知识去指导小模型训练，使得小模型具有与大模型相当的性能，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="知识蒸馏简介">
+<meta property="og:url" content="http://callmelp.online/2023/04/20/nn-knowledgeDistillation/index.html">
+<meta property="og:site_name" content="我的技术测试">
+<meta property="og:description" content="介绍在化学中，蒸馏是一种有效的分离不同沸点组分的方法，大致步骤是先升温使低沸点的组分汽化，然后降温冷凝，达到分离出目标物质的目的。化学蒸馏条件:（1）蒸馏的液体是混合物;（2）各组分沸点不同。 一般地，大模型往往是单个复杂网络或者是若干网络的集合，拥有良好的性能和泛化能力，而小模型因为网络规模较小，表达能力有限。因此，可以利用大模型学习到的知识去指导小模型训练，使得小模型具有与大模型相当的性能，但">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png">
+<meta property="article:published_time" content="2023-04-20T12:32:31.000Z">
+<meta property="article:modified_time" content="2023-04-20T12:47:33.378Z">
+<meta property="article:author" content="Patrick">
+<meta property="article:tag" content="Log">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://callmelp.online/2023/04/20/nn-knowledgeDistillation/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?abd60509cbed3d7c6baef1cba2320d84";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/js/search/local-search.js","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '知识蒸馏简介',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2023-04-20 20:47:33'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/video.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/me.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">我的技术测试</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">知识蒸馏简介</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-20T12:32:31.000Z" title="发表于 2023-04-20 20:32:31">2023-04-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-20T12:47:33.378Z" title="更新于 2023-04-20 20:47:33">2023-04-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="知识蒸馏简介"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>在化学中，蒸馏是一种有效的分离不同沸点组分的方法，大致步骤是先升温使低沸点的组分汽化，然后降温冷凝，达到分离出目标物质的目的。化学蒸馏条件:<br>（1）蒸馏的液体是混合物;<br>（2）各组分沸点不同。</p>
+<p>一般地，大模型往往是单个复杂网络或者是若干网络的集合，拥有良好的性能和泛化能力，而小模型因为网络规模较小，表达能力有限。因此，可以利用大模型学习到的知识去指导小模型训练，使得小模型具有与大模型相当的性能，但是参数数量大幅降低，从而实现模型压缩与加速，这就是知识蒸馏与迁移学习在模型优化中的应用。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png" alt="20230418201141"><br>Hinton等人最早在文章《Distilling the Knowledge in a Neural Network》中提出了知识蒸馏这个概念，其核心思想是先训练一个复杂网络模型，然后使用这个复杂网络的输出和数据的真实标签去训练一个更小的网络，因此知识蒸馏框架通常包含了一个复杂模型(被称为Teacher模型)和一个小模型(被称为Student模型)。</p>
+<h2 id="知识蒸馏的作用"><a href="#知识蒸馏的作用" class="headerlink" title="知识蒸馏的作用"></a>知识蒸馏的作用</h2><p>深度学习在计算机视觉、语音识别、自然语言处理等内的众多领域中均取得了令人难以置信的性能。但是，大多数模型在计算上过于昂贵，无法在移动端或嵌入式设备上运行。因此需要对模型进行压缩，且知识蒸馏是模型压缩中重要的技术之一。</p>
+<h3 id="提升模型精度"><a href="#提升模型精度" class="headerlink" title="提升模型精度"></a>提升模型精度</h3><p>如果对目前的网络模型A的精度不是很满意，那么可以先训练一个更高精度的teacher模型B（通常参数量更多，时延更大），然后用这个训练好的teacher模型B对student模型A进行知识蒸馏，得到一个更高精度的A模型。  </p>
+<h3 id="降低模型时延，压缩网络参数"><a href="#降低模型时延，压缩网络参数" class="headerlink" title="降低模型时延，压缩网络参数"></a>降低模型时延，压缩网络参数</h3><p>如果对目前的网络模型A的时延不满意，可以先找到一个时延更低，参数量更小的模型B，通常来讲，这种模型精度也会比较低，然后通过训练一个更高精度的teacher模型C来对这个参数量小的模型B进行知识蒸馏，使得该模型B的精度接近最原始的模型A，从而达到降低时延的目的。     </p>
+<h3 id="标签之间的域迁移"><a href="#标签之间的域迁移" class="headerlink" title="标签之间的域迁移"></a>标签之间的域迁移</h3><p>假如使用狗和猫的数据集训练了一个teacher模型A，使用香蕉和苹果训练了一个teacher模型B，那么就可以用这两个模型同时蒸馏出一个可以识别狗、猫、香蕉以及苹果的模型，将两个不同域的数据集进行集成和迁移。</p>
+<blockquote>
+<h3 id="模型压缩知识补充"><a href="#模型压缩知识补充" class="headerlink" title="模型压缩知识补充"></a>模型压缩知识补充</h3><ul>
+<li>模型剪枝：即移除对结果作用较小的组件，如减少 head 的数量和去除作用较少的层，共享参数等，ALBERT属于这种；    </li>
+<li>量化：比如将 float32 降到 float8；    </li>
+<li>知识蒸馏：将 teacher 的能力蒸馏到 student上，一般 student 会比 teacher 小。我们可以把一个大而深的网络蒸馏到一个小的网络，也可以把集成的网络蒸馏到一个小的网络上。    </li>
+<li>参数共享：通过共享参数，达到减少网络参数的目的，如 ALBERT 共享了 Transformer 层；    </li>
+<li>参数矩阵近似：通过矩阵的低秩分解或其他方法达到降低矩阵参数的目的；</li>
+</ul>
+</blockquote>
+<h3 id="知识蒸馏与从头开始训练模型有什么不同？"><a href="#知识蒸馏与从头开始训练模型有什么不同？" class="headerlink" title="知识蒸馏与从头开始训练模型有什么不同？"></a>知识蒸馏与从头开始训练模型有什么不同？</h3><p>显然，对于更复杂的模型，理论搜索空间要大于较小网络的搜索空间。但是，如果我们假设使用较小的网络可以实现相同（甚至相似）的收敛，则教师网络的收敛空间应与学生网络的解空间重叠。</p>
+<p>不幸的是，仅此一项并不能保证学生网络在同一位置收敛。学生网络的收敛可能与教师网络的收敛大不相同。但是，如果指导学生网络复制教师网络的行为（教师网络已经在更大的解空间中进行了搜索），则可以预期其收敛空间与原始教师网络收敛空间重叠。      </p>
+<p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201935.png" alt="20230418201935">         </p>
+<h1 id="知识蒸馏的方法"><a href="#知识蒸馏的方法" class="headerlink" title="知识蒸馏的方法"></a>知识蒸馏的方法</h1><p>知识蒸馏是对模型的能力进行迁移，根据迁移的方法不同可以简单分为<strong>基于目标蒸馏</strong>（也称为Soft-target蒸馏或Logits方法蒸馏）和<strong>基于特征蒸馏</strong>的算法两个大的方向，下面我们对其进行介绍。</p>
+<h2 id="目标蒸馏-Logits方法"><a href="#目标蒸馏-Logits方法" class="headerlink" title="目标蒸馏-Logits方法"></a>目标蒸馏-Logits方法</h2><p>目标蒸馏方法中最经典的论文就是来自于2015年Hinton发表的一篇神作《<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1503.02531.pdf">Distilling the Knowledge in a Neural Network</a>》。下面我们以这篇神作为例，给大家讲讲目标蒸馏方法的原理。</p>
+<p>在这篇论文中，Hinton将问题限定在分类问题下，分类问题的共同点是模型最后会有一个softmax层，其输出值对应了相应类别的概率值。在知识蒸馏时，由于我们已经有了一个泛化能力较强的Teacher模型，我们在利用Teacher模型来蒸馏训练Student模型时，可以直接让Student模型去学习Teacher模型的泛化能力。一个很直白且高效的迁移泛化能力的方法就是：使用softmax层输出的类别的概率来作为“Soft-target” 。</p>
+<h3 id="Hard-target-和-Soft-target"><a href="#Hard-target-和-Soft-target" class="headerlink" title="Hard-target 和 Soft-target"></a>Hard-target 和 Soft-target</h3><p>传统的神经网络训练方法是定义一个损失函数，目标是使预测值尽可能接近于真实值（Hard- target），损失函数就是使神经网络的损失值和尽可能小。这种训练过程是对ground truth求极大似然。在知识蒸馏中，是使用大模型的类别概率作为Soft-target的训练过程。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418202454.png" alt="20230418202454">   </p>
+<ul>
+<li>Hard-target：原始数据集标注的 one-shot 标签，除了正标签为 1，其他负标签都是 0。</li>
+<li>Soft-target：Teacher模型softmax层输出的类别概率，每个类别都分配了概率，正标签的概率最高。</li>
+</ul>
+<p>知识蒸馏用Teacher模型预测的 Soft-target 来辅助 Hard-target 训练 Student模型的方式为什么有效呢？softmax层的输出，除了正例之外，负标签也带有Teacher模型归纳推理的大量信息，比如某些负标签对应的概率远远大于其他负标签，则代表 Teacher模型在推理时认为该样本与该负标签有一定的相似性。而在传统的训练过程(Hard-target)中，所有负标签都被统一对待。也就是说，知识蒸馏的训练方式使得每个样本给Student模型带来的信息量大于传统的训练方式。</p>
+<p>如在MNIST数据集中做手写体数字识别任务，假设某个输入的“2”更加形似”3”，softmax的输出值中”3”对应的概率会比其他负标签类别高；而另一个”2”更加形似”7”，则这个样本分配给”7”对应的概率会比其他负标签类别高。这两个”2”对应的Hard-target的值是相同的，但是它们的Soft-target却是不同的，由此我们可见Soft-target蕴含着比Hard-target更多的信息。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418202721.png" alt="20230418202721"><br>在使用 Soft-target 训练时，Student模型可以很快学习到 Teacher模型的推理过程；而传统的 Hard-target 的训练方式，所有的负标签都会被平等对待。因此，Soft-target 给 Student模型带来的信息量要大于 Hard-target，并且Soft-target分布的熵相对高时，其Soft-target蕴含的知识就更丰富。同时，使用 Soft-target 训练时，梯度的方差会更小，训练时可以使用更大的学习率，所需要的样本也更少。这也解释了为什么通过蒸馏的方法训练出的Student模型相比使用完全相同的模型结构和训练数据只使用Hard-target的训练方法得到的模型，拥有更好的泛化能力。</p>
+<h3 id="目标蒸馏的具体方法"><a href="#目标蒸馏的具体方法" class="headerlink" title="目标蒸馏的具体方法"></a>目标蒸馏的具体方法</h3><p>在介绍知识蒸馏方法之前，首先得明白什么是Logits。我们知道，对于一般的分类问题，比如图片分类，输入一张图片后，经过DNN网络各种非线性变换，在网络最后Softmax层之前，会得到这张图片属于各个类别的大小数值$z_{i}$，某个类别的$z_{i}$数值越大，则模型认为输入图片属于这个类别的可能性就越大。<br>什么是Logits? 这些汇总了网络内部各种信息后，得出的属于各个类别的汇总分值$z_{i}$，就是Logits，i代表第i个类别，$z_{i}$代表属于第i类的可能性。因为Logits并非概率值，所以一般在Logits数值上会用Softmax函数进行变换，得出的概率值作为最终分类结果概率。<u>Softmax一方面把Logits数值在各类别之间进行概率归一</u>，使得各个类别归属数值满足概率分布；<u>另外一方面，它会放大Logits数值之间的差异，使得Logits得分两极分化</u>，Logits得分高的得到的概率值更偏大一些，而较低的Logits数值，得到的概率值则更小。</p>
+<p>神经网络使用 softmax 层来实现 logits 向 probabilities 的转换。原始的softmax函数：<br>$$<br>q_{i}&#x3D; \frac{\exp{(z_{i})}}{\sum_{j}{\exp{(z_{i})}}}<br>$$<br>但是直接使用softmax层的输出值作为soft target，这又会带来一个问题: 当softmax输出的概率分布熵相对较小时，负标签的值都很接近0，对损失函数的贡献非常小，小到可以忽略不计。因此”温度”这个变量就派上了用场。下面的公式是加了温度这个变量之后的softmax函数:<br>$$<br>q_{i}&#x3D; \frac{\exp{(z_{i}&#x2F;T)}}{\sum_{j}{\exp{(z_{i}&#x2F;T)}}}<br>$$<br>其中$q_{i}$是每个类别输出的概率，$z_{i}$是每个类别输出的 logits，$T$就是温度。当温度$T &#x3D; 1$时，这就是标准的 Softmax 公式。$T$越高，softmax的output probability distribution越趋于平滑，其分布的熵越大，负标签携带的信息会被相对地放大，模型训练将更加关注负标签。</p>
+<p>知识蒸馏训练的具体方法如下图所示，主要包括以下几个步骤：   </p>
+<ol>
+<li>训练好Teacher模型；</li>
+<li>利用高温 $T_{high}$ 产生 Soft-target；</li>
+<li>使用 ${Soft-taget, T_{high}}$ 和 ${Hard - target, T &#x3D; 1}$ 同时训练 Student模型；</li>
+<li>设置温度 $T &#x3D; 1$，Student模型线上做inference。</li>
+</ol>
+<p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418204335.png" alt="20230418204335"><br>训练Teacher的过程很简单，我们把第2步和第3步过程统一称为：高温蒸馏的过程。高温蒸馏过程的目标函数由distill loss(对应Soft-target)和Student loss(对应Hard-target)加权得到。如下所示：<br>$$<br>L &#x3D; \alpha L_{soft}+\beta L_{hard}<br>$$    </p>
+
+> (1) Teacher模型和Student模型同时输入 transfer set (这里可以直接复用训练Teacher模型用到的training set)，用Teacher模型在高温 $T_{high}$ 下产生的softmax distribution来作为Soft-target，Student模型在相同温度 $T_{high}$ 条件下的softmax输出和Soft-target的cross entropy就是Loss函数的第一部分 $L_{soft}$，具体形式如下所示：
+> $$
+> L_{soft} = -\sum^{N}_{i}p^{T}_{i}\log{(q^{T}_{i})}
+> $$
+> 其中，$p^{T}_{i}$ 指Teacher模型在温度等于T的条件下softmax输出在第 $i$ 类上的值。$q^{T}_{i}$ 指Student的在温度等于 $T$ 的条件下softmax输出在第 $i$ 类上的值。公式如下：
+> $$
+> p^{T}_{i} = \frac{\exp{(v_{i}/T)}}{\sum^{N}_{k}\exp{(v_{k}/T)}}
+> $$
+> $$
+> q^{T}_{i} = \frac{\exp{(z_{i}/T)}}{\sum^{N}_{k}\exp{(z_{k}/T)}}
+> $$
+> 其中，$v_{i}$ 指Teacher模型的logits，$z_{i}$ 指Student模型的logits， $N$ 指总标签数量。  
+> (2) Student模型在T=1的条件下的softmax输出和ground truth的cross entropy就是Loss函数的第二部分 $L_{hard}$ 。
+> $$
+> L_{hard} = - \sum^{N}_{i}c_{i}\log{(q^{1}_{i})}
+> $$
+> 其中， $c_{i}$ 指在第 $i$ 类上的ground truth值,$c_{i} \in{\{0,1\}}$, 正标签取1，负标签取0。$q^{1}_{i}$ 形式如下：
+> $$
+>  q^{1}_{i} = \frac{\exp{(z_{i})}}{\sum^{N}_{k}{\exp{z_{k}}}}
+> $$
+> 第二部分Loss $L_{hard}$ 的必要性其实很好理解：Teacher模型也有一定的错误率，使用ground truth可以有效降低错误被传播给Student模型的可能性。打个比喻，老师虽然学识远远超过学生，但是他仍然有出错的可能，而这时候如果学生在老师的教授之外，可以同时参考到标准答案，就可以有效地降低被老师偶尔的错误“带偏”的可能性。    
+
+<p>最后，$\alpha$ 和 $\beta$ 是关于 $L_{soft}$ 和 $L_{hard}$ 的权重，实验发现，当 $L_{hard}$ 权重较小时，能产生最好的效果，这是一个经验性的结论。文章《【经典简读】知识蒸馏(Knowledge Distillation) 经典之作》，地址：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102038521">https://zhuanlan.zhihu.com/p/102038521</a> 和 文章《【Knowledge Distillation】知识蒸馏学习》，地址：<a target="_blank" rel="noopener" href="https://baihaoran.xyz/2020/05/04/Knowledge-Distillation.html">https://baihaoran.xyz/2020/05/04/Knowledge-Distillation.html</a> 都进行了理论的推导，这里我直接给出结论：由于 $L_{soft}$ 贡献的梯度大约为 $L_{hard}$ 的 $\frac{1}{T^{2}}$，因此在同时使用Soft-target和Hard-target的时候，需要在 $L_{soft}$ 的权重上乘以 $T^{2}$ 的系数，这样才能保证Soft-target和Hard-target贡献的梯度量基本一致。</p>
+<h3 id="蒸馏的一种特殊形式：-直接Matching-Logits"><a href="#蒸馏的一种特殊形式：-直接Matching-Logits" class="headerlink" title="蒸馏的一种特殊形式： 直接Matching Logits"></a>蒸馏的一种特殊形式： 直接Matching Logits</h3><p>直接Matching Logits指的是，直接使用softmax层的输入logits（而不再是输出）作为Soft- target，需要最小化的目标函数是Teacher模型和Student模型的logits之间的平方差，推导不详细解释。经过Softmax的蒸馏方式和直接Matching Logits的方式，当温度 $T \rightarrow \infty$ 时Soft-target损失函数部分是等价的，即Matching Logits是一般知识蒸馏方法的一种特殊形式。</p>
+<h3 id="关于温度"><a href="#关于温度" class="headerlink" title="关于温度"></a>关于温度</h3><p>这里消除关于温度的伏笔。在知识蒸馏中，需要使用高温将知识“蒸馏”出来，但是如何调节温度 $T$ 呢，温度的变化会产生怎样的影响呢？<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418211846.png" alt="20230418211846"><br>温度 $T$ 有这样几个特点：</p>
+<ul>
+<li>原始的softmax函数是 $T &#x3D; 1$ 时的特例；$T&lt;1$ 时，概率分布比原始更“陡峭”，也就是说，当 $T \rightarrow 0$ 时，Softmax 的输出值会接近于 Hard-target；$T&gt;1$时，概率分布比原始更“平缓”。</li>
+<li>随着 $T$ 的增加，Softmax 的输出分布越来越平缓，信息熵会越来越大。温度越高，softmax上各个值的分布就越平均，思考极端情况，当 $T$ ，此时softmax的值是平均分布的。</li>
+<li>不管温度 $T$ 怎么取值，Soft-target都有忽略相对较小的 $p_{i}$ （Teacher模型在温度为T时softmax输出在第 $i$ 类上的值）携带的信息的倾向。</li>
+</ul>
+<p>温度的高低改变的是Student模型训练过程中对负标签的关注程度。当温度较低时，对负标签的关注，尤其是那些显著低于平均值的负标签的关注较少；而温度较高时，负标签相关的值会相对增大，Student模型会相对更多地关注到负标签。</p>
+<p>实际上，负标签中包含一定的信息，尤其是那些负标签概率值显著高于平均值的负标签。但由于Teacher模型的训练过程决定了负标签部分概率值都比较小，并且负标签的值越低，其信息就越不可靠。因此温度的选取需要进行实际实验的比较，本质上就是在下面两种情况之中取舍:    </p>
+<ul>
+<li>当想从负标签中学到一些信息量的时候，温度 $T$ 应调高一些；</li>
+<li>当想减少负标签的干扰的时候，温度 $T$ 应调低一些；</li>
+</ul>
+<p>总的来说，$T$ 的选择和Student模型的大小有关，Student模型参数量比较小的时候，相对比较低的温度就可以了。因为参数量小的模型不能学到所有Teacher模型的知识，所以可以适当忽略掉一些负标签的信息。</p>
+<p>最后，在整个知识蒸馏过程中，<u>我们先让温度 $T$ 升高，然后在测试阶段恢复“低温“（ $T &#x3D; 1$ ），从而将原模型中的知识提取出来，因此将其称为是蒸馏</u>，实在是妙啊。</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>待补充。。。。。</p>
+<h2 id="特征蒸馏"><a href="#特征蒸馏" class="headerlink" title="特征蒸馏"></a>特征蒸馏</h2><p>另外一种知识蒸馏思路是特征蒸馏方法，如下图所示。它不像Logits方法那样，Student只学习Teacher的Logits这种结果知识，而是学习Teacher网络结构中的中间层特征。最早采用这种模式的工作来自于论文《FITNETS：Hints for Thin Deep Nets》，它强迫Student某些中间层的网络响应，要去逼近Teacher对应的中间层的网络响应。这种情况下，Teacher中间特征层的响应，就是传递给Student的知识。在此之后，出了各种新方法，但是大致思路还是这个思路，本质是Teacher将特征级知识迁移给Student。因此，接下来我们以这篇论文为主，详细介绍特征蒸馏方法的原理。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418212538.png" alt="20230418212538"></p>
+<h3 id="主要解决的问题"><a href="#主要解决的问题" class="headerlink" title="主要解决的问题"></a>主要解决的问题</h3><p>这篇论文首先提出一个案例，既宽又深的模型通常需要大量的乘法运算，从而导致对内存和计算的高需求。因此，即使网络在准确性方面是性能最高的模型，其在现实世界中的应用也受到限制。</p>
+<p>为了解决这类问题，我们需要通过模型压缩（也称为知识蒸馏）将知识从复杂的模型转移到参数较少的简单模型。</p>
+<p>到目前为止，知识蒸馏技术已经考虑了Student网络与Teacher网络有相同或更小的参数。这里有一个洞察点是，深度是特征学习的基本层面，到目前为止尚未考虑到Student网络的深度。一个具有比Teacher网络更多的层但每层具有较少神经元数量的Student网络称为“thin deep network”。</p>
+<p>因此，该篇论文主要针对Hinton提出的知识蒸馏法进行扩展，允许Student网络可以比Teacher网络更深更窄，使用teacher网络的输出和中间层的特征作为提示，改进训练过程和student网络的性能。</p>
+<h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><ul>
+<li>Student网络不仅仅拟合Teacher网络的Soft-target，而且拟合隐藏层的输出（Teacher网络抽取的特征）；</li>
+<li>第一阶段让Student网络去学习Teacher网络的隐藏层输出（特征蒸馏）；</li>
+<li>第二阶段使用Soft-target来训练Student网络（目标蒸馏）。<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418212819.png" alt="20230418212819"><br>把“宽”且“深”的网络蒸馏成“瘦”且“更深”的网络，需要进行两阶段的训练：<br><strong>第一阶段</strong>：首先选择待蒸馏的中间层（即Teacher的Hint layer和Student的Guided layer），如图中绿框和红框所示。由于两者的输出尺寸可能不同，因此，在Guided layer后另外接一层（上采样）卷积层，使得输出尺寸与Teacher的Hint layer匹配。接着通过知识蒸馏的方式训练Student网络的Guided layer，使得Student网络的中间层学习到Teacher的Hint layer的输出.</li>
+</ul>
+<p>就是根据Teacher模型的损失来指导预训练Student模型。记Teacher网络的前 $h$ 层作为 $W_{Hint}$ ，意为指导的意思。Student网络的前 $g$ 层作为 $W_{Guided}$，即被指导的意思，在训练之初Student网络进行随机初始化。需要学习一个映射函数 $W_{r}$ 使得 $W_{Guided}$ 的维度匹配 $W_{Hint}$ ，得到Student模型在下一阶段的参数初始化值，并最小化两者网络输出的MSE差异作为损失（特征蒸馏），如下：<br>$$<br>L_{HT}(W_{Guided},W_{r}) &#x3D; \frac{1}{2}||u_{h}(x, W_{Hint})-r(v_{g}(x;W_{Guided});W_{r})||^{2}<br>$$<br>其中，$W_{Hint}$  是教师网络的部分层的参数（绿框）；$W_{Guided}$ 是学生网络的部分层的参数（红框）；$W_{r}$ 是一个全连接层，用于将两个网络输出的size配齐，因为学生网络隐藏层宽度比教师网络窄。</p>
+<p>第二阶段： 在训练好Guided layer之后，将当前的参数作为网络的初始参数，利用知识蒸馏的方式训练Student网络的所有层参数，使Student学习Teacher的输出。由于Teacher对于简单任务的预测非常准确，在分类任务中近乎one-hot输出，因此为了弱化预测输出，使所含信息更加丰富，作者使用Hinton等人论文《Distilling knowledge in a neural network》中提出的softmax改造方法，即在softmax前引入 $\tau$ 缩放因子，将Teacher和Student的pre-softmax输出均除以 $\tau$ 。也就是上面我们讲的加了温度的softmax。此时的损失函数为：<br>$$<br>L_{KD}(W_{S}) &#x3D; H(y_{true}, P_{s}) + \lambda H(P^{\tau}<em>{T},P^{\tau}</em>{S})<br>$$<br>其中， $H$ 指交叉熵损失函数；$\lambda$ 是一个可调整参数，以平衡两个交叉熵；第一部分为Student的输出与Ground-truth的交叉熵损失；第二部分为Student与Teacher的softmax输出的交叉熵损失。</p>
+<h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><p>待补充。。。。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/nature553863/article/details/80568658">https://blog.csdn.net/nature553863/article/details/80568658</a><br><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1673896462976965754&amp;wfr=spider&amp;for=pc">https://baijiahao.baidu.com/s?id=1673896462976965754&amp;wfr=spider&amp;for=pc</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://callmelp.online">Patrick</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://callmelp.online/2023/04/20/nn-knowledgeDistillation/">http://callmelp.online/2023/04/20/nn-knowledgeDistillation/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://callmelp.online" target="_blank">我的技术测试</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Log/">Log</a></div><div class="post_share"><div class="social-share" data-image="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/04/20/nn-conv-deconv/"><img class="prev-cover" src="/img/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">神经网络中的卷积与反卷积</div></div></a></div><div class="next-post pull-right"><a href="/2023/04/20/VFI-superslomo/"><img class="next-cover" src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230420155215.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">视频插帧之super_slomo</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/04/18/VFI-RIFE/" title="视频插帧之RIFE"><img class="cover" src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230412222613.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-18</div><div class="title">视频插帧之RIFE</div></div></a></div><div><a href="/2023/04/18/VFI-foreward-backward-warping/" title="视频插帧之前后向变形"><img class="cover" src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230412161726.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-18</div><div class="title">视频插帧之前后向变形</div></div></a></div><div><a href="/2023/04/18/VFI-DVF/" title="视频插帧之DVF"><img class="cover" src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230411214638.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-18</div><div class="title">视频插帧之DVF</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/me.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Patrick</div><div class="author-info__description">自称全栈工程师</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/callmeLP"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/callmeLP" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:343786790@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://www.zhihu.com/people/serenade-96-19" target="_blank" title="zhihu"><i class="fab fa-zhihu"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E8%92%B8%E9%A6%8F%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">知识蒸馏的作用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E6%A8%A1%E5%9E%8B%E7%B2%BE%E5%BA%A6"><span class="toc-number">1.1.1.</span> <span class="toc-text">提升模型精度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%8D%E4%BD%8E%E6%A8%A1%E5%9E%8B%E6%97%B6%E5%BB%B6%EF%BC%8C%E5%8E%8B%E7%BC%A9%E7%BD%91%E7%BB%9C%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">降低模型时延，压缩网络参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E7%AD%BE%E4%B9%8B%E9%97%B4%E7%9A%84%E5%9F%9F%E8%BF%81%E7%A7%BB"><span class="toc-number">1.1.3.</span> <span class="toc-text">标签之间的域迁移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9%E7%9F%A5%E8%AF%86%E8%A1%A5%E5%85%85"><span class="toc-number">1.1.4.</span> <span class="toc-text">模型压缩知识补充</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E8%92%B8%E9%A6%8F%E4%B8%8E%E4%BB%8E%E5%A4%B4%E5%BC%80%E5%A7%8B%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E6%9C%89%E4%BB%80%E4%B9%88%E4%B8%8D%E5%90%8C%EF%BC%9F"><span class="toc-number">1.1.5.</span> <span class="toc-text">知识蒸馏与从头开始训练模型有什么不同？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E8%92%B8%E9%A6%8F%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">知识蒸馏的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E8%92%B8%E9%A6%8F-Logits%E6%96%B9%E6%B3%95"><span class="toc-number">2.1.</span> <span class="toc-text">目标蒸馏-Logits方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Hard-target-%E5%92%8C-Soft-target"><span class="toc-number">2.1.1.</span> <span class="toc-text">Hard-target 和 Soft-target</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E8%92%B8%E9%A6%8F%E7%9A%84%E5%85%B7%E4%BD%93%E6%96%B9%E6%B3%95"><span class="toc-number">2.1.2.</span> <span class="toc-text">目标蒸馏的具体方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%92%B8%E9%A6%8F%E7%9A%84%E4%B8%80%E7%A7%8D%E7%89%B9%E6%AE%8A%E5%BD%A2%E5%BC%8F%EF%BC%9A-%E7%9B%B4%E6%8E%A5Matching-Logits"><span class="toc-number">2.1.3.</span> <span class="toc-text">蒸馏的一种特殊形式： 直接Matching Logits</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E6%B8%A9%E5%BA%A6"><span class="toc-number">2.1.4.</span> <span class="toc-text">关于温度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">2.1.5.</span> <span class="toc-text">代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E8%92%B8%E9%A6%8F"><span class="toc-number">2.2.</span> <span class="toc-text">特征蒸馏</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.2.1.</span> <span class="toc-text">主要解决的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="toc-number">2.2.2.</span> <span class="toc-text">模型结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">代码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/04/20/nn-conv-deconv/" title="神经网络中的卷积与反卷积"><img src="/img/default_cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="神经网络中的卷积与反卷积"/></a><div class="content"><a class="title" href="/2023/04/20/nn-conv-deconv/" title="神经网络中的卷积与反卷积">神经网络中的卷积与反卷积</a><time datetime="2023-04-20T12:34:22.000Z" title="发表于 2023-04-20 20:34:22">2023-04-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/20/nn-knowledgeDistillation/" title="知识蒸馏简介"><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230418201141.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="知识蒸馏简介"/></a><div class="content"><a class="title" href="/2023/04/20/nn-knowledgeDistillation/" title="知识蒸馏简介">知识蒸馏简介</a><time datetime="2023-04-20T12:32:31.000Z" title="发表于 2023-04-20 20:32:31">2023-04-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/20/VFI-superslomo/" title="视频插帧之super_slomo"><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230420155215.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之super_slomo"/></a><div class="content"><a class="title" href="/2023/04/20/VFI-superslomo/" title="视频插帧之super_slomo">视频插帧之super_slomo</a><time datetime="2023-04-20T12:29:31.000Z" title="发表于 2023-04-20 20:29:31">2023-04-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-DVF-vocelAndInsert/" title="视频插帧之DVF中的体素流与三线性插值"><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230411195043.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之DVF中的体素流与三线性插值"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-DVF-vocelAndInsert/" title="视频插帧之DVF中的体素流与三线性插值">视频插帧之DVF中的体素流与三线性插值</a><time datetime="2023-04-18T02:59:33.000Z" title="发表于 2023-04-18 10:59:33">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/04/18/VFI-foreward-backward-warping/" title="视频插帧之前后向变形"><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230412161726.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="视频插帧之前后向变形"/></a><div class="content"><a class="title" href="/2023/04/18/VFI-foreward-backward-warping/" title="视频插帧之前后向变形">视频插帧之前后向变形</a><time datetime="2023-04-18T02:57:44.000Z" title="发表于 2023-04-18 10:57:44">2023-04-18</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Patrick</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="framework-info"><img src="https://static.dy208.cn/o_1dfilp8ruo521thr1hvf18ji17soa.png"/><span> </span><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/">黔ICP备2022002429号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container').forEach(node => {
+            if (node.hasAttribute('display')) {
+              btf.wrap(node, 'div', { class: 'mathjax-overflow' })
+            } else {
+              btf.wrap(node, 'span', { class: 'mathjax-overflow' })
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'oYv71MVDp4E6q2tg0PEzNyns-gzGzoHsz',
+      appKey: 'ljivoAUqxqrxlExQo7yIrgcg',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, "https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start -->
+  <script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/hexo-github-calendar@1.16/hexo_githubcalendar.js"></script>
+  <script data-pjax>
+        function GithubCalendarConfig(){
+            var git_githubapiurl ="https://python-github-calendar-api.vercel.app/api?callmeLP";
+            var git_color =['#ebedf0', '#fdcdec', '#fc9bd9', '#fa6ac5', '#f838b2', '#f5089f', '#c4067e', '#92055e', '#540336', '#48022f', '#30021f'];
+            var git_user ="callmeLP";
+            var parent_div_git = document.getElementById('recent-posts');
+            var git_div_html = '<div class="recent-post-item" style="width:100%;height:auto;padding:10px;"><div id="github_loading" style="width:10%;height:100%;margin:0 auto;display: block"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 50 50" style="enable-background:new 0 0 50 50" xml:space="preserve"><path fill="#d0d0d0" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z" transform="rotate(275.098 25 25)"><animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"></animateTransform></path></svg></div><div id="github_container"></div></div>';
+            if(parent_div_git && location.pathname =='/'){
+                console.log('已挂载github calendar')
+                // parent_div_git.innerHTML=git_div_html+parent_div_git.innerHTML // 无报错，但不影响使用(支持pjax跳转)
+                parent_div_git.insertAdjacentHTML("afterbegin",git_div_html) // 有报错，但不影响使用(支持pjax跳转)
+            };
+            GithubCalendar(git_githubapiurl,git_color,git_user)
+        }
+        if(document.getElementById('recent-posts')){
+            GithubCalendarConfig()
+        }
+    </script>
+    <style>#github_container{min-height:280px}@media screen and (max-width:650px) {#github_container{background-image:;min-height:0px}}</style>
+    <style>undefined</style><!-- hexo injector body_end end --></body></html>
