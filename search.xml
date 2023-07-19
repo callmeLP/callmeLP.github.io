@@ -11,10 +11,116 @@
         <content type="html"><![CDATA[<h1 id="如何计算模型的推理时间"><a href="#如何计算模型的推理时间" class="headerlink" title="如何计算模型的推理时间"></a>如何计算模型的推理时间</h1><p>为了理解如何优化神经网络，我们必须有一个指标，通常该指标为推理时间，推理时间指的是神经网络执行一次前向传播所需要的时间。通常我们用一秒钟内模型能够执行的推理次数来表示模型的推理速度，单位用<code>fps</code>表示。假如模型推理一次需要的时间为<code>0.1s</code>，那么其推理速度可以表示为<code>1/0.1=10fps</code>。</p><p>为了衡量模型的推理时间，我们首先需要弄明白3个概念： <code>FLOPs</code>， <code>FLOPS</code>， 和 <code>MACs</code>。</p><ul><li>FLOPs<br>为了衡量模型的推理时间，我们可以计算模型必须执行的计算操作的总数。在这里提出术语<code>FLOP(Floating Point Operation)</code>，即浮点运算操作，这些运算操作包括加、减、乘、除和其他任何跟浮点数相关的操作。一个模型的<code>FLOPs</code>为该模型全部的<code>FLOP</code>之和，这个数值可以告诉我们模型的复杂程度。</li><li>FLOPS<br><code>FLOPS(Floating Point Operations per Second)</code>表示每秒钟内可以执行的浮点运算数。该指标可以用来衡量我们使用的计算平台的性能，其值越大，表明在该计算平台上每秒钟内可执行的浮点操作数越多，那么模型的推理速度就越快。</li><li>MACs<br><code>MACs(Multiply-Accumulate Computations)</code>一次MAC操作表示执行了一次加法和一次乘法操作，相当于做了两次浮点操作，所以有1 MAC &#x3D; 2 FLOPS。</li></ul><h2 id="如何计算模型的FLOPs值"><a href="#如何计算模型的FLOPs值" class="headerlink" title="如何计算模型的FLOPs值"></a>如何计算模型的FLOPs值</h2><p>我们以下面的模型为例介绍如何计算模型的<code>FLOPs</code>值，该模型是一个对<code>MNIST</code>手写数字数据集进行分类的模型：    </p><ul><li>输入数据为<code>28x28x1</code>的灰度图；</li><li>2个卷积层，每个卷积层包含5个大小为<code>3x3</code>的卷积核；</li><li>一个全连接层，包含128个神经元；</li><li>一个全连接层，包含10个神经元，分别代表从0到9范围内的10个类别；<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230425214011.png" alt="20230425214011"><br>计算模型<code>FLOPs</code>值的公式如下：     </li><li>卷积层：<br><code>FLOPs = 2 * 卷积核数量 * 卷积核大小 * 输出尺寸</code><br>其中，<code>输出尺寸=(输入尺寸 - 卷积核大小) + 1</code></li><li>全连接层：<br><code>FLOPs = 2 * 输入尺寸 * 输出尺寸</code></li></ul><p>根据上述计算方法，可以计算出该分类模型的FLOPs值，   </p><p>第1个卷积层:     </p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">FLOPs值 = 2x5x(3x3)x26x26 = 60,840 FLOPs</span><br><span class="line">```    </span><br><span class="line">第2个卷积层:</span><br></pre></td></tr></table></figure><p>FLOPs值 &#x3D; 2x5x(3x3x5)x24x24 &#x3D; 259,200 FLOPs</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第1个全连接层:</span><br></pre></td></tr></table></figure><p>FLOPs值 &#x3D; 2x(24x24x5)x128 &#x3D; 737,280 FLOPs</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第2个全连接层:</span><br></pre></td></tr></table></figure><p>FLOPs值 &#x3D; 2x128x10 &#x3D; 2,560 FLOPs</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">那么整个模型全部的FLOPs值 = 60,840 + 259,200 + 737,280 + 2,560 = 1,060,400 FLOPs。     </span><br><span class="line">![20230425214301](https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230425214301.png)</span><br><span class="line">假设我们的计算平台的计算能力为1GFLOPS，那么可以计算在该计算平台上模型推理所需要的时间为:    </span><br></pre></td></tr></table></figure><p>推理时间 &#x3D; 1,060,400 &#x2F; 1,000,000,000 &#x3D; 0.001s &#x3D; 1ms</p><p>&#96;&#96;&#96;<br>可以看到，如果我们知道计算平台的FLOPS值和模型的FLOPs值是很容易计算出模型的推理时间的。    </p><h1 id="如何优化模型"><a href="#如何优化模型" class="headerlink" title="如何优化模型"></a>如何优化模型</h1><p>前面介绍了如何计算模型的推理时间，接下来进入正题，介绍如何通过优化模型来减少模型的推理时间。优化模型的方法主要分为两种类型：</p><ul><li>减少模型尺寸；</li><li>减少计算操作；</li></ul><h2 id="减少模型尺寸"><a href="#减少模型尺寸" class="headerlink" title="减少模型尺寸"></a>减少模型尺寸</h2><p>减少模型尺寸的好处是可以减少占用的存储空间、提升模型加载速度、提升推理速度等。通常我们可以通过以下3钟方法减少模型尺寸：</p><h3 id="量化"><a href="#量化" class="headerlink" title="量化"></a>量化</h3><p>量化是将数值从较大的集合映射到较小的集合的过程。换句话说，我们通过减少大的连续数，并用较小的连续数甚至整数替换它们来达到量化的目的，比如我们可以将权重值2.87950387409量化为2.9。我们可以对权重和激活函数进行量化，量化的结果是改变了数值的精度，最常用的是将32位浮点数(FP32)或16位浮点数(FP16)量化为8位整型数(INT8)甚至4位整型数(INT4)。量化的好处是减少了模型占用的内存量并且降低了计算的复杂度，但是由于降低了模型权重和激活函数的精度，通常会使得量化后模型的推理精度会有所下降。    </p><h3 id="权重共享"><a href="#权重共享" class="headerlink" title="权重共享"></a>权重共享</h3><p>权重共享是指不同神经元之间共享权重，通过共享的方式，我们可以减少一部分权重，从而减少模型的大小。    </p><h3 id="知识蒸馏"><a href="#知识蒸馏" class="headerlink" title="知识蒸馏"></a>知识蒸馏</h3><p>知识蒸馏是一种将规模较大、精度较高的模型(teacher)获得的知识迁移到结构简单、计算成本较低的模型(student)上的一种方法。知识蒸馏可以比较形象地理解为老师教学生的过程：老师将自己学习到的知识进行提炼，然后将这些知识教给学生，学生学到的知识虽然不如老师那么广博，但是也深得其精髓。    </p><h2 id="减少计算操作"><a href="#减少计算操作" class="headerlink" title="减少计算操作"></a>减少计算操作</h2><p>减少计算操作的方法主要是用过一些更高效、计算量更少的操作来代替模型中原有操作。本文介绍3种减少计算操作的方法：    </p><h3 id="池化"><a href="#池化" class="headerlink" title="池化"></a>池化</h3><p>如果你对深度学习有所了解，那么一定听过最大池化操作和平均池化操作，这些池化操作都是为了减少计算操作。池化层相当于是一个下采样层，可以减少从一层传递到另一层的参数量。池化层通常用在卷积层之后以保留空间信息，同时减少参数数量。下图是最大池化层的示例，最大池化操作是保留窗口中的最大值而丢掉其他的值，从而达到减少参数的目的。</p><h3 id="可分离卷积"><a href="#可分离卷积" class="headerlink" title="可分离卷积"></a>可分离卷积</h3><p>可分离卷积是将标准卷积层分为两个卷积层：depthwise卷积和pointwise卷积。</p><ul><li>depthwise卷积也是普通的卷积，但是与标准卷积的操作方式不同。举个例子，假设卷积层的输入通道为4，输出通道为8，标准卷积是在4个输入通道上同时做卷积操作然后把得到的结果作为一个输出通道，如果要输出8个通道则要进行8次这样的卷积过程；depthwise卷积则是分别在4个通道上做卷积操作，然后每个通道得到的结果作为一个输出通道，也就是输入是几个通道，输出就是几个通道。在这个例子中，标准卷积生成一个输出通道的计算量是depthwise卷积生成一个输出通道计算量的4倍。</li><li>pointwise卷积是1x1的卷积，通常用在depthwise卷积之后，用于对depthwise卷积生成的特征图在深度方向进行信息整合。<br>用<code>depthwise</code>卷积+<code>pointwise</code>卷积的可分离卷积代替标准卷积，可以非常显著地减少计算量，我们来看下图的例子：<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230425214736.png" alt="20230425214736"><br>在上图中，depthwise卷积+pointwise卷积的FLOPs值大约为734KFLOPs。让我们再来看使用同样参数的标准卷积层的计算量：<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230425214820.png" alt="20230425214820"><br>可以看出，使用标准卷积的<code>FLOPs</code>值大约为<code>20MFLOPs</code>，是可分离卷积的20多倍。换句话说，在这个例子中，用可分离卷积代替标准卷积可以将推理速度提升20倍之多！</li></ul><h3 id="模型剪枝"><a href="#模型剪枝" class="headerlink" title="模型剪枝"></a>模型剪枝</h3><p>修剪是一种模型压缩技术，该方法在尽可能地保留网络原始精度的条件下删除冗余的网络参数以达到降低模型计算复杂度的目的。为了实现该技术，我们首先根据每个神经元对整个模型的重要程度进行分级，然后删除级别较低的神经元，为此，我们可以通过将神经元的连接设置为0或将权重设置为0来删除某个神经元。通过模型剪枝方法，我们可以得到规模更小、推理速度更快、推理精度损失最小的模型。</p>]]></content>
       
       
+      <categories>
+          
+          <category> Log </category>
+          
+      </categories>
+      
       
         <tags>
             
-            <tag> Log </tag>
+            <tag> Neural Networks </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>关键帧提取常用方法</title>
+      <link href="/2023/07/19/keyFrame/"/>
+      <url>/2023/07/19/keyFrame/</url>
+      
+        <content type="html"><![CDATA[<h1 id="视频关键帧提取常用方法"><a href="#视频关键帧提取常用方法" class="headerlink" title="视频关键帧提取常用方法"></a>视频关键帧提取常用方法</h1><p>关键帧，是指动画中一个绘图，定义任何的起点和终点平滑过渡。一系列关键帧定义了观看者将看到的运动，而关键帧在电影，视频或动画上的位置定义了运动的时间。</p><h2 id="基于镜头的方法"><a href="#基于镜头的方法" class="headerlink" title="基于镜头的方法"></a>基于镜头的方法</h2><p>基于镜头的关键帧提取算法是视频检索领域中最先发展起来，也是目前最为成熟的一种通用方法，该算法的一般实现过程是：先按照某种技术手段把源视频文件按照镜头变化分割，然后在视频每个镜头中选择首、尾两帧作为关键帧。这种方法的优点是实施起来很简单，算法的计算量也很小，但是这种方法存在很大的局限性，当视频中内容变化剧烈、场景非常复杂时，选取镜头中的首、尾两帧并不能代表视频的全部内容变化，所以该方法已经远远不能满足当今社会人们对关键帧提取的标准和要求。</p><h2 id="基于运动分析的方法"><a href="#基于运动分析的方法" class="headerlink" title="基于运动分析的方法"></a>基于运动分析的方法</h2><p>这种方法是一些学者基于物体运动特征的属性提出的一种关键帧提取算法，它一般的实现过程是：在视频镜头中分析物体运动的光流量，每次选择视频镜头中光流移动次数最少的视频帧作为提取到的关键帧。利用光流法计算视频帧的运动量公式如下所示：<br>$$<br>M(k) &#x3D; \sum \sum |L_{x}(i,j,k)|+|L_{y}(i,j,k)|<br>$$<br>式中，M(K)表示第 k 帧的运动量,Lx(i,j,k)表示第k帧像素点(i,j)处光流X的分量，Ly(i,j,k)表示第k帧像素点(i,j)处光流y的分量。计算完成后，取局部最小值作为所要提取的关键帧。计算公式如下所示：<br>$$<br>M(k_{i}) &#x3D; \min[M(k)]<br>$$<br>这种方法可以从大部分视频镜头中提取适量的关键帧，提取到的关键帧也可以有效地表达出视频运动的特征。但是，这种方法主要的缺点是：算法本身的鲁棒性较差，因为它不仅依赖于物体运动的局部特征，而且计算过程也较为复杂，算法在时间上的开销代价较大。</p><h2 id="基于视频聚类的方法"><a href="#基于视频聚类的方法" class="headerlink" title="基于视频聚类的方法"></a>基于视频聚类的方法</h2><p>这种方法在提取关键帧的过程中是通过聚类的方式来表达视频的主题，通过聚类把视频帧划分为若干个簇，这一过程结束后在每个簇中选取相应的帧作为关键帧。该算法基本思想是：首先，初始化一个聚类中心。其次，通过计算聚类中心与当前帧之间的范围，确定被分为类的参考帧或者作为类的新聚类中心。最后，我们选择离聚类中心最近的视频帧处理成关键帧。<br>该算法的主要实现步骤如下：</p><ul><li>（1） 输入视频帧数据的集合表示为：X&#x3D;{x1,…xn},其中每个x分别代表的是第i帧对应的m维特征向量，在给定的初始聚类个数k(k≤n)的前提下，划分聚类的集合个数。</li><li>（2） 基于视频帧的颜色直方图的属性来提取集合 X 中的特征值，根据提取到的颜色特征值划分聚类个数，划分过程可以用聚类模型的最小值C 来表示，计算公式如下所示：<br>$$<br>C &#x3D; \arg \min \sum^{k}<em>{i&#x3D;1} \sum</em>{x_{j} \in C_{i}}||x_{j}-u_{i}||^{2}<br>$$<br>式中C&#x3D;{C1,C2…Cn}，就是聚类的结果，ui表示聚类ci的平均值。</li><li>（3）从 中将视频帧的第一帧对应的特征向量x1 归入到第一个类中，并且将第一帧对应的的颜色直方图的特征值作为第一个类的初始质心。</li><li>（4）计算视频帧到质心的距离，如果当前比较的视频帧的距离大于给定的初始阈值T ,那么就把该帧归入到新的类中；反之，把当前帧归入到距离它最近的类中，并且更新该类的质心。</li><li>（5）重复 （4）过程，直到最后一帧对应特征向量的值nx 归入某一个类中或者其作为一个新的类中心。</li><li>（6）每次选取距离聚类中心最近的视频帧作为关键帧。利用这种算法提取出的视频关键帧不仅冗余度小，而且关键帧可以很准确的反映出视频中发生的全部内容。但是，基于聚类的方法在划分聚类簇的过程中并没有充分考虑到各帧之间时间的先后变化顺序，并且在聚类之前需要预先设定一定数量的簇，所以该方法的适用性受到一定程度的限制。</li></ul><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://blog.csdn.net/caiji_is_studying/article/details/103718527">https://blog.csdn.net/caiji_is_studying/article/details/103718527</a>      </p><p><a href="https://blog.csdn.net/Ailberty/article/details/109581016?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-109581016-blog-103718527.235%5Ev34%5Epc_relevant_increate_t0_download_v2_base&amp;spm=1001.2101.3001.4242.1&amp;utm_relevant_index=3">https://blog.csdn.net/Ailberty/article/details/109581016?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-109581016-blog-103718527.235^v34^pc_relevant_increate_t0_download_v2_base&amp;spm=1001.2101.3001.4242.1&amp;utm_relevant_index=3</a></p><p><a href="https://blog.csdn.net/justloveyou_/article/details/88076675">https://blog.csdn.net/justloveyou_/article/details/88076675</a></p><p><a href="https://blog.csdn.net/qingyuanluofeng/article/details/45375647">https://blog.csdn.net/qingyuanluofeng/article/details/45375647</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Log </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> keyFrame </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>注意力机制</title>
+      <link href="/2023/07/19/nn_attition/"/>
+      <url>/2023/07/19/nn_attition/</url>
+      
+        <content type="html"><![CDATA[<h1 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h1><p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601163400.png" alt="20230601163400"><br>$$<br>Q : query(查询)    \newline<br>K ：key（键）    \newline<br>V ：value（值）     \newline<br>\sqrt{d_{k}}: 因为QK相乘后会得到很大的梯度，使得softmax之后得到很小的梯度，\newline为解决这一问题引入\sqrt{d_{k}}（梯度小训练慢）<br>$$<br>举个例子（淘宝搜索）：    </p><ol><li>淘宝搜索东西时，输入查询（qurey， Q）比如笔记本</li><li>【计算相似性】∶淘宝后台拿到这个查询Q，并用这个查询Q去和后台的所有的商品的关键字(或者title)(key，K)—一的来对比，找到物品和我们查询的相似性(或者说物品对应的相似性的权重)，相似性越高，越可能推送给我们</li><li>【得到价值】︰并且这个时候还要考虑物品的价值(value，V)，这个V不是指物品值几块钱，而是这个物品在算法中的价值。如果商家给了淘宝广告钱，或者商品物美价廉，评论好，点赞高，购买多，等等，那么算法就越有可能把物品排在前面推送给我们。</li><li>【计算带权重的价值】:我们拿刚刚的相似性，乘上物品在算法中的价值V，计算结果就是每件物品的最后的带相似性权重的价值，淘宝最后的算法就是返回这个带权重的价值，也就是把排好序的这些商品推送给我们。</li></ol><h2 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h2><p>现在要计算Thinking和Machines之间的相关性<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601171931.png" alt="20230601171931"></p><p>有了x如何计算qkv呢：<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601172057.png" alt="20230601172057"></p><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://jalammar.github.io/illustrated-transformer/">http://jalammar.github.io/illustrated-transformer/</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Log </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Neural Networks </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>注意力机制和自注意力机制的区别</title>
+      <link href="/2023/07/19/nn_attition1/"/>
+      <url>/2023/07/19/nn_attition1/</url>
+      
+        <content type="html"><![CDATA[<p>Self Attention:不是 Target 和 Source 之间的 Attention 机制，而是 Source 内部元素之间或者 Target 内部元素之间发生的 Attention 机制，也可以理解为 Target&#x3D;Source 这种特殊情况下的注意力计算机制。</p><p>具体计算过程是一样的，只是计算对象发生了变化而已。</p><h1 id="注意力机制和自注意力机制的区别"><a href="#注意力机制和自注意力机制的区别" class="headerlink" title="注意力机制和自注意力机制的区别"></a>注意力机制和自注意力机制的区别</h1><h2 id="抽象的文本处理领域的-Encoder-Decoder-框架"><a href="#抽象的文本处理领域的-Encoder-Decoder-框架" class="headerlink" title="抽象的文本处理领域的 Encoder-Decoder 框架"></a>抽象的文本处理领域的 Encoder-Decoder 框架</h2><p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601163049.png" alt="20230601163049"></p><h2 id="没有用注意力情况"><a href="#没有用注意力情况" class="headerlink" title="没有用注意力情况"></a>没有用注意力情况</h2><p>首先，输入的信息经过 encoder 先转换为语义编码 c</p><p>生成输出的时候，借助语义编码 c</p><p>I&#x3D; f(语义编码 c)</p><p>love&#x3D; f(语义编码 c，I)</p><p>you &#x3D; f(语义编码 c，I，love)</p><blockquote><p>为什么没有用到注意力机制？<br>因为对于输出的每一个字，语义编码 c 的都是一样的，<br>而这个语义编码是通过我喜欢你四个字来的，<br>也就是对于生成 I，love，you，而言，用到的我喜欢你四个字的权重是一样的    </p></blockquote><h2 id="用注意力的情况"><a href="#用注意力的情况" class="headerlink" title="用注意力的情况"></a>用注意力的情况</h2><p>比如生成 I 的时候，</p><p>语义编码 c&#x3D; [ 我(0.7)，喜(0.1) ，欢(0.1) ，你(0.1) ]，</p><p>这样就比较合理了</p><p>这里的这个 I 就是查询 Q（因为我现在的需求就是生成 I），也就是类似我们淘宝实例中的查询（query）“笔记本”</p><p>这里的这样语义编码 c1，c2，c3 就相当于淘宝的数据库返回的查询结果</p><p>我喜欢你就相当于淘宝数据库里面的一件件物品，这个时候 key 和 value 都是“我”对应的语义编码</p><p>我的(0.7)这个 0.7 就是公式算出来的相似度权重</p><p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601163400.png" alt="20230601163400"><br>表达的意思就是，我查 I 的时候，“我”是 0.7 的概率，排在最前面，所以我会优先选择它，其它字依次<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601163416.png" alt="20230601163416"><br>语义编码 c 的信息是动态变化的</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Log </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Neural Networks </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>transformer</title>
+      <link href="/2023/07/19/nn_transformer/"/>
+      <url>/2023/07/19/nn_transformer/</url>
+      
+        <content type="html"><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>目前我们输入的都是一个向量，最后输出类别或者数值（例如一张图片分类或检测task）<br>假设现在输入变成一个向量序列，同时长度会改变，那该怎么解决呢？<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601185145.png" alt="20230601185145"></p><blockquote><p>第一个例子：<br>词汇序列转换：一个单词对应一个向量，一个句子就是一排长度不一的向量，如何把一个单词表示成一个向量呢？<br>有两种做法：one-hot Encoding和Word Embeding<br>one-hot Encoding缺点是每个词汇之间我们看不到任何联系<br>Word Embedding每个词向量是有语义顺序的，画出来就会是动物在一块(dog,cat,rabbit)，植物在一块(tree,flower)等<br><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601185332.png" alt="20230601185332"></p></blockquote><blockquote><p>第二个例子：<br>一段声音其实就是一排向量，我们取一段语音信号作为窗口，把其中的信息描述为一个向量（帧），滑动这个窗口就得到这段语音的所有向量，一分钟有6000个声音向量</p></blockquote><h1 id="transfoemer的结构"><a href="#transfoemer的结构" class="headerlink" title="transfoemer的结构"></a>transfoemer的结构</h1><p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601184754.png" alt="20230601184754"></p><p>可以看出它是一个典型的seq2seq结构（encoder-decoder结构），Encoder里面有N个重复的block结构，Decoder里面也有N个重复的block结构。</p><p><img src="https://lpblog-1259256967.cos.ap-chengdu.myqcloud.com/blog/20230601184835.png" alt="20230601184835"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Logs </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Neural Networks </tag>
             
         </tags>
       
